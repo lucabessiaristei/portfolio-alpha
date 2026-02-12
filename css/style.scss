@@ -1,4 +1,25 @@
+@use "sass:math";
 @import url('https://fonts.googleapis.com/css2?family=Archivo&display=swap');
+
+$web-faces: 5;
+$illu-faces: 6;
+$extra-faces: 4;
+$about-faces: 3;
+
+$web-width: 3rem;
+$illu-width: 3rem;
+$extra-width: 3rem;
+$about-width: 3rem;
+
+$web-open-depth: 30vw;
+$illu-open-depth: 38vw;
+$extra-open-depth: 40vw;
+$about-open-depth: 25vw;
+
+@function apothem($width, $faces) {
+	$angle: math.div(180deg, $faces);
+	@return math.div($width, 2) / math.tan($angle);
+}
 
 * {
 	box-sizing: border-box;
@@ -258,7 +279,7 @@ body {
 
 #web {
 	&.origami_container {
-		width: 3rem;
+		width: $web-width;
 		height: 7rem;
 	}
 
@@ -267,61 +288,36 @@ body {
 	}
 
 	&.is_open .origami {
-		transform: translateZ(-30vw);
+		transform: translateZ(-$web-open-depth);
 	}
 
 	.origami_face::before {
 		content: "Web";
 	}
 
+	$angle: 360deg / $web-faces;
+	$closed-depth: apothem($web-width, $web-faces);
+
 	&.is_open .origami_face {
-		&:nth-child(1) {
-			transform: rotateY(0deg) translateZ(30vw);
-		}
-
-		&:nth-child(2) {
-			transform: rotateY(72deg) translateZ(30vw);
-		}
-
-		&:nth-child(3) {
-			transform: rotateY(144deg) translateZ(30vw);
-		}
-
-		&:nth-child(4) {
-			transform: rotateY(216deg) translateZ(30vw);
-		}
-
-		&:nth-child(5) {
-			transform: rotateY(288deg) translateZ(30vw);
+		@for $i from 1 through $web-faces {
+			&:nth-child(#{$i}) {
+				transform: rotateY(($i - 1) * $angle) translateZ($web-open-depth);
+			}
 		}
 	}
 
 	.origami_face {
-		&:nth-child(1) {
-			transform: rotateY(0deg) translateZ(2.0645728rem);
-		}
-
-		&:nth-child(2) {
-			transform: rotateY(72deg) translateZ(2.0645728rem);
-		}
-
-		&:nth-child(3) {
-			transform: rotateY(144deg) translateZ(2.0645728rem);
-		}
-
-		&:nth-child(4) {
-			transform: rotateY(216deg) translateZ(2.0645728rem);
-		}
-
-		&:nth-child(5) {
-			transform: rotateY(288deg) translateZ(2.0645728rem);
+		@for $i from 1 through $web-faces {
+			&:nth-child(#{$i}) {
+				transform: rotateY(($i - 1) * $angle) translateZ($closed-depth);
+			}
 		}
 	}
 }
 
 #illu {
 	&.origami_container {
-		width: 3rem;
+		width: $illu-width;
 		height: 12.5rem;
 
 		&.is_open {
@@ -334,69 +330,36 @@ body {
 	}
 
 	&.is_open .origami {
-		transform: translateZ(-38vw);
+		transform: translateZ(-$illu-open-depth);
 	}
 
 	.origami_face::before {
 		content: "Illustration";
 	}
 
+	$angle: 360deg / $illu-faces;
+	$closed-depth: apothem($illu-width, $illu-faces);
+
 	&.is_open .origami_face {
-		&:nth-child(1) {
-			transform: rotateY(0deg) translateZ(38vw);
-		}
-
-		&:nth-child(2) {
-			transform: rotateY(60deg) translateZ(38vw);
-		}
-
-		&:nth-child(3) {
-			transform: rotateY(120deg) translateZ(38vw);
-		}
-
-		&:nth-child(4) {
-			transform: rotateY(180deg) translateZ(38vw);
-		}
-
-		&:nth-child(5) {
-			transform: rotateY(240deg) translateZ(38vw);
-		}
-
-		&:nth-child(6) {
-			transform: rotateY(300deg) translateZ(38vw);
+		@for $i from 1 through $illu-faces {
+			&:nth-child(#{$i}) {
+				transform: rotateY(($i - 1) * $angle) translateZ($illu-open-depth);
+			}
 		}
 	}
 
 	.origami_face {
-		&:nth-child(1) {
-			transform: rotateY(0deg) translateZ(2.5980762rem);
-		}
-
-		&:nth-child(2) {
-			transform: rotateY(60deg) translateZ(2.5980762rem);
-		}
-
-		&:nth-child(3) {
-			transform: rotateY(120deg) translateZ(2.5980762rem);
-		}
-
-		&:nth-child(4) {
-			transform: rotateY(180deg) translateZ(2.5980762rem);
-		}
-
-		&:nth-child(5) {
-			transform: rotateY(240deg) translateZ(2.5980762rem);
-		}
-
-		&:nth-child(6) {
-			transform: rotateY(300deg) translateZ(2.5980762rem);
+		@for $i from 1 through $illu-faces {
+			&:nth-child(#{$i}) {
+				transform: rotateY(($i - 1) * $angle) translateZ($closed-depth);
+			}
 		}
 	}
 }
 
 #extra {
 	&.origami_container {
-		width: 3rem;
+		width: $extra-width;
 		height: 7.5rem;
 
 		&.is_open {
@@ -409,46 +372,29 @@ body {
 	}
 
 	&.is_open .origami {
-		transform: translateZ(-40vw);
+		transform: translateZ(-$extra-open-depth);
 	}
 
 	.origami_face::before {
 		content: "Extra";
 	}
 
+	$angle: 360deg / $extra-faces;
+	$closed-depth: apothem($extra-width, $extra-faces);
+
 	&.is_open .origami_face {
-		&:nth-child(1) {
-			transform: rotateY(0deg) translateZ(40vw);
-		}
-
-		&:nth-child(2) {
-			transform: rotateY(90deg) translateZ(40vw);
-		}
-
-		&:nth-child(3) {
-			transform: rotateY(180deg) translateZ(40vw);
-		}
-
-		&:nth-child(4) {
-			transform: rotateY(270deg) translateZ(40vw);
+		@for $i from 1 through $extra-faces {
+			&:nth-child(#{$i}) {
+				transform: rotateY(($i - 1) * $angle) translateZ($extra-open-depth);
+			}
 		}
 	}
 
 	.origami_face {
-		&:nth-child(1) {
-			transform: rotateY(0deg) translateZ(1.5rem);
-		}
-
-		&:nth-child(2) {
-			transform: rotateY(90deg) translateZ(1.5rem);
-		}
-
-		&:nth-child(3) {
-			transform: rotateY(180deg) translateZ(1.5rem);
-		}
-
-		&:nth-child(4) {
-			transform: rotateY(270deg) translateZ(1.5rem);
+		@for $i from 1 through $extra-faces {
+			&:nth-child(#{$i}) {
+				transform: rotateY(($i - 1) * $angle) translateZ($closed-depth);
+			}
 		}
 	}
 }
@@ -457,7 +403,7 @@ body {
 	display: none;
 
 	&.origami_container {
-		width: 3rem;
+		width: $about-width;
 		height: 8rem;
 	}
 
@@ -466,7 +412,7 @@ body {
 	}
 
 	&.is_open .origami {
-		transform: translateZ(-25vw);
+		transform: translateZ(-$about-open-depth);
 	}
 
 	.origami_face::before {
@@ -480,31 +426,22 @@ body {
 		background-repeat: no-repeat;
 	}
 
+	$angle: 360deg / $about-faces;
+	$closed-depth: apothem($about-width, $about-faces);
+
 	&.is_open .origami_face {
-		&:nth-child(1) {
-			transform: rotateY(0deg) translateZ(25vw);
-		}
-
-		&:nth-child(2) {
-			transform: rotateY(120deg) translateZ(25vw);
-		}
-
-		&:nth-child(3) {
-			transform: rotateY(240deg) translateZ(25vw);
+		@for $i from 1 through $about-faces {
+			&:nth-child(#{$i}) {
+				transform: rotateY(($i - 1) * $angle) translateZ($about-open-depth);
+			}
 		}
 	}
 
 	.origami_face {
-		&:nth-child(1) {
-			transform: rotateY(0deg) translateZ(0.8660254rem);
-		}
-
-		&:nth-child(2) {
-			transform: rotateY(120deg) translateZ(0.8660254rem);
-		}
-
-		&:nth-child(3) {
-			transform: rotateY(240deg) translateZ(0.8660254rem);
+		@for $i from 1 through $about-faces {
+			&:nth-child(#{$i}) {
+				transform: rotateY(($i - 1) * $angle) translateZ($closed-depth);
+			}
 		}
 	}
 }
