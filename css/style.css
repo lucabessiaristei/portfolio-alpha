@@ -1,260 +1,480 @@
+@import url("https://fonts.googleapis.com/css2?family=Archivo&display=swap");
 * {
-	box-sizing: border-box;
-	padding: 0;
-	margin: 0;
-	overscroll-behavior: none;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  overscroll-behavior: none;
 }
 
 :root {
-	--black: #010101;
-	--white: #f5f5f5;
+  --black: #010101;
+  --white: #f5f5f5;
 }
 
 ::selection {
-	color: #fff;
-	background: var(--accent);
+  color: #fff;
+  background: var(--accent);
 }
 
 ::-moz-selection {
-	color: #fff;
-	background: var(--accent);
+  color: #fff;
+  background: var(--accent);
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Archivo&display=swap');
-
 .is_hidden {
-	height: 0;
-	width: 0;
-	overflow: hidden;
-	opacity: 0;
-	user-select: none;
+  height: 0;
+  width: 0;
+  overflow: hidden;
+  opacity: 0;
+  user-select: none;
 }
 
 html,
 body {
-	height: 100%;
-	width: 100%;
-	color: var(--black);
-	font-family: 'Archivo', sans-serif;
-	overflow: hidden;
-	overscroll-behavior: none;
-	background-color: var(--black);
+  height: 100%;
+  width: 100%;
+  color: var(--black);
+  font-family: 'Archivo', sans-serif;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background-color: var(--black);
 }
 
 #container {
-	height: 100%;
-	width: 100vw;
-	display: flex;
-	flex-flow: column;
-	align-items: center;
-	justify-content: center;
-	overflow: hidden;
+  height: 100%;
+  width: 100vw;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .origami_container {
-	position: absolute;
-	perspective: 40rem;
-	perspective-origin: 30% 30%;
-	transform: translateY(0);
-	transition: .8s;
+  position: absolute;
+  perspective: 40rem;
+  perspective-origin: 30% 30%;
+  transform: translateY(0);
+  transition: .8s;
 }
 
-#web.origami_container.is_open,
-#illu.origami_container.is_open,
-#extra.origami_container.is_open,
-#about.origami_container.is_open {
-	height: 75%;
-	width: 40vw;
-	perspective: 300vw;
-	perspective-origin: 50% 50%;
-	transform: translateY(-2rem);
-	transition: .8s;
+.origami_container#web.is_open, .origami_container#illu.is_open, .origami_container#extra.is_open, .origami_container#about.is_open {
+  height: 75%;
+  width: 40vw;
+  perspective: 300vw;
+  perspective-origin: 50% 50%;
+  transform: translateY(-2rem);
+  transition: .8s;
 }
 
 .origami {
-	width: 100%;
-	height: 100%;
-	transform-style: preserve-3d;
-	transition: .8s;
-	user-select: none;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: .8s;
+  user-select: none;
 }
 
 #web.is_open .origami,
 #illu.is_open .origami,
 #extra.is_open .origami,
 #about.is_open .origami {
-	width: 100%;
-	height: 100%;
-	transform-style: preserve-3d;
-	user-select: text;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  user-select: text;
 }
 
 .origami_face {
-	position: absolute;
-	display: flex;
-	align-items: center;
-	justify-content: space-around;
-	background-color: var(--white);
-	cursor: pointer;
-	transition: .8s;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background-color: var(--white);
+  cursor: pointer;
+  transition: .8s;
 }
 
 .origami_face::before {
-	content: "";
-	opacity: 1;
-	font-size: 2rem;
-	font-weight: 400;
-	color: var(--black);
-	transform: rotateZ(90deg);
-	display: flex;
-	justify-content: center;
-	width: 100%;
-	transition: opacity ease .5s .8s,
-		width 0s .8s,
-		height 0s .8s;
+  content: "";
+  opacity: 1;
+  font-size: 2rem;
+  font-weight: 400;
+  color: var(--black);
+  transform: rotateZ(90deg);
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  transition: opacity ease .5s .8s, width 0s .8s, height 0s .8s;
 }
 
 .is_open .origami_face::before {
-	height: 0;
-	width: 0;
-	opacity: 0;
-	transition: opacity 0s;
+  height: 0;
+  width: 0;
+  opacity: 0;
+  transition: opacity 0s;
 }
 
 #web .origami_face,
 #illu .origami_face,
 #extra .origami_face,
 #about .origami_face {
-	width: 100%;
-	height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 #web.is_open .origami_face,
 #illu.is_open .origami_face,
 #extra.is_open .origami_face,
 #about.is_open .origami_face {
-	cursor: auto;
-}
-
-.origami_header {
-	transition: height .8s;
-}
-
-.is_open .origami_header {
-	width: 100%;
-	height: 3.5rem;
-	display: flex;
-	justify-content: space-between;
-	line-height: 2rem;
-	font-size: 2rem;
-	font-weight: 300;
-	color: var(--white);
-	transition: opacity ease .5s .8s, height .8s;
-	user-select: none;
-}
-
-
-.origami_header .origami_close {
-	height: fit-content;
-	border-bottom: 2px dotted var(--accent);
-	cursor: pointer;
-}
-
-.origami_header .origami_close:hover {
-	color: var(--accent);
-	border-bottom: 2px dotted var(--accent);
-	cursor: pointer;
-}
-
-.origami_face .origami_label {
-	height: fit-content;
-	opacity: 1;
-	line-height: normal;
-	font-size: 2rem;
-	font-weight: 400;
-	color: var(--black);
-	transform: rotateZ(90deg);
-	height: auto !important;
+  cursor: auto;
 }
 
 .is_open .origami_face {
-	z-index: 0;
+  z-index: 0;
 }
 
 .is_open .origami_face.selected {
-	z-index: 20;
+  z-index: 20;
 }
 
 .is_open .origami_face.selectable {
-	z-index: 10;
+  z-index: 10;
+}
+
+.origami_face .origami_label {
+  height: fit-content;
+  opacity: 1;
+  line-height: normal;
+  font-size: 2rem;
+  font-weight: 400;
+  color: var(--black);
+  transform: rotateZ(90deg);
+  height: auto !important;
 }
 
 .is_open .origami_face .origami_label {
-	opacity: 0;
-	width: 0;
-	height: 0;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.origami_header {
+  transition: height .8s;
+}
+
+.is_open .origami_header {
+  width: 100%;
+  height: 3.5rem;
+  display: flex;
+  justify-content: space-between;
+  line-height: 2rem;
+  font-size: 2rem;
+  font-weight: 300;
+  color: var(--white);
+  transition: opacity ease .5s .8s, height .8s;
+  user-select: none;
+}
+
+.origami_header .origami_close {
+  height: fit-content;
+  border-bottom: 2px dotted var(--accent);
+  cursor: pointer;
+}
+
+.origami_header .origami_close:hover {
+  color: var(--accent);
+  border-bottom: 2px dotted var(--accent);
+  cursor: pointer;
 }
 
 .project_container {
-	transition: opacity 0s;
-	cursor: default;
+  transition: opacity 0s;
+  cursor: default;
 }
 
 .is_open .project_container {
-	width: 100%;
-	height: 100%;
-	padding: 1.5rem;
-	line-height: 1.5rem;
-	overflow-y: hidden;
-	transition: opacity ease .5s .8s, width 0s .8s, height 0s .8s;
-}
-
-.selected .project_container {
-	overflow-y: auto;
-	-webkit-overflow-scrolling: touch;
-	overscroll-behavior: none;
+  width: 100%;
+  height: 100%;
+  padding: 1.5rem;
+  line-height: 1.5rem;
+  overflow-y: hidden;
+  transition: opacity ease .5s .8s, width 0s .8s, height 0s .8s;
 }
 
 .is_open .project_container::-webkit-scrollbar {
-	display: none;
+  display: none;
+}
+
+.selected .project_container {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;
 }
 
 .is_open .project_title {
-	font-size: 1.8rem;
-	text-transform: uppercase;
-	font-family: 'Archivo Narrow', sans-serif;
-	color: var(--black);
-	margin-bottom: 1.8rem;
-	user-select: none;
+  font-size: 1.8rem;
+  text-transform: uppercase;
+  font-family: 'Archivo Narrow', sans-serif;
+  color: var(--black);
+  margin-bottom: 1.8rem;
+  user-select: none;
 }
 
 .is_open .project_desc {
-	font-size: 1rem;
-	line-height: 1.3rem;
-	margin-bottom: 1.8rem;
+  font-size: 1rem;
+  line-height: 1.3rem;
+  margin-bottom: 1.8rem;
 }
 
 .is_open .project_container a {
-	text-decoration: none;
-	color: var(--black);
-	/* color: #fff;
-	background-color: var(--accent); */
-	border-bottom: 2px dotted var(--accent);
-
+  text-decoration: none;
+  color: var(--black);
+  border-bottom: 2px dotted var(--accent);
 }
 
 .is_open .project_container a:hover {
-	color: var(--accent);
+  color: var(--accent);
 }
 
 .is_open .project_img {
-	/* border: 2px solid var(--black); */
-	width: 100%;
-	height: auto;
-	margin-bottom: 1.8rem;
-	user-select: none;
+  width: 100%;
+  height: auto;
+  margin-bottom: 1.8rem;
+  user-select: none;
 }
 
 .is_open .project_img:last-child {
-	margin: 0
+  margin: 0;
+}
+
+#web.origami_container {
+  width: 3rem;
+  height: 7rem;
+}
+
+#web .origami {
+  transform: translateX(calc(-7.5rem - 1vw)) rotateX(-20deg) rotateY(40deg) rotateZ(-100deg);
+}
+
+#web.is_open .origami {
+  transform: translateZ(-30vw);
+}
+
+#web .origami_face::before {
+  content: "Web";
+}
+
+#web.is_open .origami_face:nth-child(1) {
+  transform: rotateY(0deg) translateZ(30vw);
+}
+
+#web.is_open .origami_face:nth-child(2) {
+  transform: rotateY(72deg) translateZ(30vw);
+}
+
+#web.is_open .origami_face:nth-child(3) {
+  transform: rotateY(144deg) translateZ(30vw);
+}
+
+#web.is_open .origami_face:nth-child(4) {
+  transform: rotateY(216deg) translateZ(30vw);
+}
+
+#web.is_open .origami_face:nth-child(5) {
+  transform: rotateY(288deg) translateZ(30vw);
+}
+
+#web .origami_face:nth-child(1) {
+  transform: rotateY(0deg) translateZ(2.06457rem);
+}
+
+#web .origami_face:nth-child(2) {
+  transform: rotateY(72deg) translateZ(2.06457rem);
+}
+
+#web .origami_face:nth-child(3) {
+  transform: rotateY(144deg) translateZ(2.06457rem);
+}
+
+#web .origami_face:nth-child(4) {
+  transform: rotateY(216deg) translateZ(2.06457rem);
+}
+
+#web .origami_face:nth-child(5) {
+  transform: rotateY(288deg) translateZ(2.06457rem);
+}
+
+#illu.origami_container {
+  width: 3rem;
+  height: 12.5rem;
+}
+
+#illu.origami_container.is_open {
+  perspective: 100vw;
+}
+
+#illu .origami {
+  transform: translateX(4.5rem) translateY(calc(-4rem - 3vh)) rotateX(30deg) rotateY(20deg) rotateZ(-150deg);
+}
+
+#illu.is_open .origami {
+  transform: translateZ(-38vw);
+}
+
+#illu .origami_face::before {
+  content: "Illustration";
+}
+
+#illu.is_open .origami_face:nth-child(1) {
+  transform: rotateY(0deg) translateZ(38vw);
+}
+
+#illu.is_open .origami_face:nth-child(2) {
+  transform: rotateY(60deg) translateZ(38vw);
+}
+
+#illu.is_open .origami_face:nth-child(3) {
+  transform: rotateY(120deg) translateZ(38vw);
+}
+
+#illu.is_open .origami_face:nth-child(4) {
+  transform: rotateY(180deg) translateZ(38vw);
+}
+
+#illu.is_open .origami_face:nth-child(5) {
+  transform: rotateY(240deg) translateZ(38vw);
+}
+
+#illu.is_open .origami_face:nth-child(6) {
+  transform: rotateY(300deg) translateZ(38vw);
+}
+
+#illu .origami_face:nth-child(1) {
+  transform: rotateY(0deg) translateZ(2.59808rem);
+}
+
+#illu .origami_face:nth-child(2) {
+  transform: rotateY(60deg) translateZ(2.59808rem);
+}
+
+#illu .origami_face:nth-child(3) {
+  transform: rotateY(120deg) translateZ(2.59808rem);
+}
+
+#illu .origami_face:nth-child(4) {
+  transform: rotateY(180deg) translateZ(2.59808rem);
+}
+
+#illu .origami_face:nth-child(5) {
+  transform: rotateY(240deg) translateZ(2.59808rem);
+}
+
+#illu .origami_face:nth-child(6) {
+  transform: rotateY(300deg) translateZ(2.59808rem);
+}
+
+#extra.origami_container {
+  width: 3rem;
+  height: 7.5rem;
+}
+
+#extra.origami_container.is_open {
+  perspective: 50vw;
+}
+
+#extra .origami {
+  transform: translateX(calc(8rem + 1vw)) rotateX(30deg) rotateY(-40deg) rotateZ(-30deg);
+}
+
+#extra.is_open .origami {
+  transform: translateZ(-40vw);
+}
+
+#extra .origami_face::before {
+  content: "Extra";
+}
+
+#extra.is_open .origami_face:nth-child(1) {
+  transform: rotateY(0deg) translateZ(40vw);
+}
+
+#extra.is_open .origami_face:nth-child(2) {
+  transform: rotateY(90deg) translateZ(40vw);
+}
+
+#extra.is_open .origami_face:nth-child(3) {
+  transform: rotateY(180deg) translateZ(40vw);
+}
+
+#extra.is_open .origami_face:nth-child(4) {
+  transform: rotateY(270deg) translateZ(40vw);
+}
+
+#extra .origami_face:nth-child(1) {
+  transform: rotateY(0deg) translateZ(1.5rem);
+}
+
+#extra .origami_face:nth-child(2) {
+  transform: rotateY(90deg) translateZ(1.5rem);
+}
+
+#extra .origami_face:nth-child(3) {
+  transform: rotateY(180deg) translateZ(1.5rem);
+}
+
+#extra .origami_face:nth-child(4) {
+  transform: rotateY(270deg) translateZ(1.5rem);
+}
+
+#about {
+  display: none;
+}
+
+#about.origami_container {
+  width: 3rem;
+  height: 8rem;
+}
+
+#about .origami {
+  transform: translateY(calc(11rem + 5vh)) rotateX(10deg) rotateY(-30deg) rotateZ(-70deg);
+}
+
+#about.is_open .origami {
+  transform: translateZ(-25vw);
+}
+
+#about .origami_face::before {
+  content: "About";
+}
+
+#about .origami_face:nth-child(3) {
+  background-image: url("/media/about/LAFOTO1000.webp");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+#about.is_open .origami_face:nth-child(1) {
+  transform: rotateY(0deg) translateZ(25vw);
+}
+
+#about.is_open .origami_face:nth-child(2) {
+  transform: rotateY(120deg) translateZ(25vw);
+}
+
+#about.is_open .origami_face:nth-child(3) {
+  transform: rotateY(240deg) translateZ(25vw);
+}
+
+#about .origami_face:nth-child(1) {
+  transform: rotateY(0deg) translateZ(0.86603rem);
+}
+
+#about .origami_face:nth-child(2) {
+  transform: rotateY(120deg) translateZ(0.86603rem);
+}
+
+#about .origami_face:nth-child(3) {
+  transform: rotateY(240deg) translateZ(0.86603rem);
 }
