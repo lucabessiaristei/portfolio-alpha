@@ -1,0 +1,432 @@
+@use "sass:math";
+@import url('https://fonts.googleapis.com/css2?family=Archivo&display=swap');
+
+$web-faces: 5;
+$illu-faces: 6;
+$extra-faces: 4;
+$about-faces: 3;
+
+$web-width: 3rem;
+$illu-width: 3rem;
+$extra-width: 3rem;
+$about-width: 3rem;
+
+$web-open-depth: 30vw;
+$illu-open-depth: 38vw;
+$extra-open-depth: 40vw;
+$about-open-depth: 25vw;
+
+@function apothem($width, $faces) {
+	$angle: math.div(180deg, $faces);
+	@return math.div($width, 2) / math.tan($angle);
+}
+
+* {
+	box-sizing: border-box;
+	padding: 0;
+	margin: 0;
+	overscroll-behavior: none;
+}
+
+:root {
+	--black: #010101;
+	--white: #f5f5f5;
+}
+
+::selection {
+	color: #fff;
+	background: var(--accent);
+}
+
+::-moz-selection {
+	color: #fff;
+	background: var(--accent);
+}
+
+.is_hidden {
+	height: 0;
+	width: 0;
+	overflow: hidden;
+	opacity: 0;
+	user-select: none;
+}
+
+html,
+body {
+	height: 100%;
+	width: 100%;
+	color: var(--black);
+	font-family: 'Archivo', sans-serif;
+	overflow: hidden;
+	overscroll-behavior: none;
+	background-color: var(--black);
+}
+
+#container {
+	height: 100%;
+	width: 100vw;
+	display: flex;
+	flex-flow: column;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+}
+
+.origami_container {
+	position: absolute;
+	perspective: 40rem;
+	perspective-origin: 30% 30%;
+	transform: translateY(0);
+
+	&#web.is_open,
+	&#illu.is_open,
+	&#extra.is_open,
+	&#about.is_open {
+		perspective: 300vw;
+		perspective-origin: 50% 50%;
+	}
+}
+
+.origami {
+	width: 100%;
+	height: 100%;
+	transform-style: preserve-3d;
+	user-select: none;
+
+	#web.is_open &,
+	#illu.is_open &,
+	#extra.is_open &,
+	#about.is_open & {
+		width: 100%;
+		height: 100%;
+		transform-style: preserve-3d;
+		user-select: text;
+	}
+}
+
+.origami_face {
+	position: absolute;
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+	background-color: var(--white);
+	cursor: pointer;
+
+	&::before {
+		content: "";
+		opacity: 1;
+		font-size: 2rem;
+		font-weight: 400;
+		color: var(--black);
+		transform: rotateZ(90deg);
+		display: flex;
+		justify-content: center;
+		width: 100%;
+	}
+
+	.is_open &::before {
+		height: 0;
+		width: 0;
+		opacity: 0;
+	}
+
+	#web &,
+	#illu &,
+	#extra &,
+	#about & {
+		width: 100%;
+		height: 100%;
+	}
+
+	#web.is_open &,
+	#illu.is_open &,
+	#extra.is_open &,
+	#about.is_open & {
+		cursor: auto;
+	}
+
+	.is_open & {
+		z-index: 0;
+
+		&.selected {
+			z-index: 20;
+		}
+
+		&.selectable {
+			z-index: 10;
+		}
+	}
+
+	.origami_label {
+		height: fit-content;
+		opacity: 1;
+		line-height: normal;
+		font-size: 2rem;
+		font-weight: 400;
+		color: var(--black);
+		transform: rotateZ(90deg);
+		height: auto !important;
+	}
+
+	.is_open & .origami_label {
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+}
+
+.origami_header {
+	.is_open & {
+		width: 100%;
+		height: 3.5rem;
+		display: flex;
+		justify-content: space-between;
+		line-height: 2rem;
+		font-size: 2rem;
+		font-weight: 300;
+		color: var(--white);
+		user-select: none;
+	}
+
+	.origami_close {
+		height: fit-content;
+		border-bottom: 2px dotted var(--accent);
+		cursor: pointer;
+		transition: color 0.2s ease, border-color 0.2s ease;
+
+		&:hover {
+			color: var(--accent);
+			border-bottom: 2px dotted var(--accent);
+		}
+	}
+}
+
+.project_container {
+	cursor: default;
+
+	.is_open & {
+		width: 100%;
+		height: 100%;
+		padding: 1.5rem;
+		line-height: 1.5rem;
+		overflow-y: hidden;
+
+		&::-webkit-scrollbar {
+			display: none;
+		}
+	}
+
+	.selected & {
+		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
+		overscroll-behavior: none;
+	}
+}
+
+.is_open {
+	.project_title {
+		font-size: 1.8rem;
+		text-transform: uppercase;
+		font-family: 'Archivo Narrow', sans-serif;
+		color: var(--black);
+		margin-bottom: 1.8rem;
+		user-select: none;
+	}
+
+	.project_desc {
+		font-size: 1rem;
+		line-height: 1.3rem;
+		margin-bottom: 1.8rem;
+	}
+
+	.project_container a {
+		text-decoration: none;
+		color: var(--black);
+		border-bottom: 2px dotted var(--accent);
+		transition: color 0.2s ease;
+
+		&:hover {
+			color: var(--accent);
+		}
+	}
+
+	.project_img {
+		width: 100%;
+		height: auto;
+		margin-bottom: 1.8rem;
+		user-select: none;
+
+		&:last-child {
+			margin: 0;
+		}
+	}
+}
+
+#web {
+	&.origami_container {
+		width: $web-width;
+		height: 7rem;
+	}
+
+	.origami {
+		transform: translateX(calc(-7.5rem - 1vw)) rotateX(-20deg) rotateY(40deg) rotateZ(-100deg);
+	}
+
+	&.is_open .origami {
+		transform: translateZ(-$web-open-depth);
+	}
+
+	.origami_face::before {
+		content: "Web";
+	}
+
+	$angle: 360deg / $web-faces;
+	$closed-depth: apothem($web-width, $web-faces);
+
+	&.is_open .origami_face {
+		@for $i from 1 through $web-faces {
+			&:nth-child(#{$i}) {
+				transform: rotateY(($i - 1) * $angle) translateZ($web-open-depth);
+			}
+		}
+	}
+
+	.origami_face {
+		@for $i from 1 through $web-faces {
+			&:nth-child(#{$i}) {
+				transform: rotateY(($i - 1) * $angle) translateZ($closed-depth);
+			}
+		}
+	}
+}
+
+#illu {
+	&.origami_container {
+		width: $illu-width;
+		height: 12.5rem;
+
+		&.is_open {
+			perspective: 100vw;
+		}
+	}
+
+	.origami {
+		transform: translateX(4.5rem) translateY(calc(-4rem - 3vh)) rotateX(30deg) rotateY(20deg) rotateZ(-150deg);
+	}
+
+	&.is_open .origami {
+		transform: translateZ(-$illu-open-depth);
+	}
+
+	.origami_face::before {
+		content: "Illustration";
+	}
+
+	$angle: 360deg / $illu-faces;
+	$closed-depth: apothem($illu-width, $illu-faces);
+
+	&.is_open .origami_face {
+		@for $i from 1 through $illu-faces {
+			&:nth-child(#{$i}) {
+				transform: rotateY(($i - 1) * $angle) translateZ($illu-open-depth);
+			}
+		}
+	}
+
+	.origami_face {
+		@for $i from 1 through $illu-faces {
+			&:nth-child(#{$i}) {
+				transform: rotateY(($i - 1) * $angle) translateZ($closed-depth);
+			}
+		}
+	}
+}
+
+#extra {
+	&.origami_container {
+		width: $extra-width;
+		height: 7.5rem;
+
+		&.is_open {
+			perspective: 50vw;
+		}
+	}
+
+	.origami {
+		transform: translateX(calc(8rem + 1vw)) rotateX(30deg) rotateY(-40deg) rotateZ(-30deg);
+	}
+
+	&.is_open .origami {
+		transform: translateZ(-$extra-open-depth);
+	}
+
+	.origami_face::before {
+		content: "Extra";
+	}
+
+	$angle: 360deg / $extra-faces;
+	$closed-depth: apothem($extra-width, $extra-faces);
+
+	&.is_open .origami_face {
+		@for $i from 1 through $extra-faces {
+			&:nth-child(#{$i}) {
+				transform: rotateY(($i - 1) * $angle) translateZ($extra-open-depth);
+			}
+		}
+	}
+
+	.origami_face {
+		@for $i from 1 through $extra-faces {
+			&:nth-child(#{$i}) {
+				transform: rotateY(($i - 1) * $angle) translateZ($closed-depth);
+			}
+		}
+	}
+}
+
+#about {
+	display: none;
+
+	&.origami_container {
+		width: $about-width;
+		height: 8rem;
+	}
+
+	.origami {
+		transform: translateY(calc(11rem + 5vh)) rotateX(10deg) rotateY(-30deg) rotateZ(-70deg);
+	}
+
+	&.is_open .origami {
+		transform: translateZ(-$about-open-depth);
+	}
+
+	.origami_face::before {
+		content: "About";
+	}
+
+	.origami_face:nth-child(3) {
+		background-image: url("/media/about/LAFOTO1000.webp");
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
+	}
+
+	$angle: 360deg / $about-faces;
+	$closed-depth: apothem($about-width, $about-faces);
+
+	&.is_open .origami_face {
+		@for $i from 1 through $about-faces {
+			&:nth-child(#{$i}) {
+				transform: rotateY(($i - 1) * $angle) translateZ($about-open-depth);
+			}
+		}
+	}
+
+	.origami_face {
+		@for $i from 1 through $about-faces {
+			&:nth-child(#{$i}) {
+				transform: rotateY(($i - 1) * $angle) translateZ($closed-depth);
+			}
+		}
+	}
+}

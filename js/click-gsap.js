@@ -1,7 +1,20 @@
+// EASING CUSTOMIZATION GUIDE:
+// 
+// 'none' - completamente lineare, nessun ease
+// 'power1.inOut' - ease molto leggero 
+// 'power2.inOut' - ease medio (default GSAP)
+// 'power3.inOut' - ease pronunciato
+// 'power1.out' - snappy, veloce all'inizio
+// 'expo.out' - molto snappy e decisivo
+//
+// Modifica le costanti sotto per cambiare il comportamento
+
+gsap.registerPlugin(ScrollToPlugin);
+
 var numFaces = 0;
 var indexFace = 0;
-var prevIndexFace = 0;
-var nextIndexFace = 0;
+var prevIndexFace = (indexFace - 1 + numFaces) % numFaces;
+var nextIndexFace = (indexFace + 1) % numFaces;
 var currentBoxContainer;
 var currentAngle = 0;
 var hiddenCls = "is_hidden";
@@ -9,227 +22,237 @@ var openCls = "is_open";
 var throttle = false;
 var isAnimating = false;
 
-var cache = {
-    origamiContainers: null,
-    projectContainers: null
-};
+const ANIMATION_DURATION = 0.5;
+const ROTATION_DURATION = 0.5;
+
+const EASE_CONTAINER = 'power1.in';  // apertura/chiusura container (più diretto)
+const EASE_FADE = 'none';                // fade in/out elementi (lineare)
+const EASE_ROTATION = 'power1.inOut';      // rotazione carousel (più snappy)
 
 $(document).ready(function () {
-    cache.origamiContainers = $('.origami_container');
-    cache.projectContainers = $('.project_container');
-    
-    gsap.set('.origami', { force3D: true });
-    gsap.set('.origami_face', { force3D: true });
 
-    setupEventListeners();
-});
-
-function setupEventListeners() {
-    $(document).on('click', '.origami_container .origami_face', handleOrigamiClick);
-    $('.origami_close').on('click', closeTheBox);
-    $(document).on('keydown', handleKeyDown);
-    $(document).on('click', '.is_open .origami_face', handleRotateClick);
-    $(window).on('keydown', handleArrowKeys);
-    $(window).on('wheel', handleWheel, { passive: false });
-
-    document.addEventListener('touchstart', handleTouchStart, { passive: true });
-    document.addEventListener('touchmove', handleTouchMove, { passive: false });
-}
-
-function handleOrigamiClick(e) {
-    currentBoxContainer = $(this).closest('.origami_container');
-    if (!currentBoxContainer.hasClass(openCls) && !isAnimating) {
-        openOrigami();
-    }
-}
-
-function openOrigami() {
-    isAnimating = true;
-    currentBoxContainer.addClass(openCls);
-    numFaces = currentBoxContainer.find('.origami_face').length;
-    
-    gsap.to(currentBoxContainer[0], {
-        zIndex: 99,
-        duration: 0
+    // Initialize all containers with proper hidden state
+    $('.origami_container').each(function() {
+        $(this).find('.origami_header').addClass(hiddenCls);
+        $(this).find('.project_container').addClass(hiddenCls);
+        gsap.set($(this).find('.origami_header'), { autoAlpha: 0 });
+        gsap.set($(this).find('.project_container'), { autoAlpha: 0 });
     });
-    
-    cache.origamiContainers.not(currentBoxContainer).css('pointer-events', 'none');
-    
-    var header = currentBoxContainer.find('.origami_header');
-    var containers = currentBoxContainer.find('.project_container');
-    
-    gsap.to(header[0], {
-        opacity: 1,
-        duration: 0.5,
-        delay: 0.8,
-        onStart: function() {
-            header.removeClass(hiddenCls);
+
+    $(document).on('click', '.origami_container .origami_face', function () {
+        if (isAnimating) return;
+        
+        currentBoxContainer = $(this).closest('.origami_container');
+        if (!currentBoxContainer.hasClass(openCls)) {
+            openOrigami(currentBoxContainer);
         }
     });
+
+    $('.origami_close').on('click', function () {
+        if (!isAnimating) {
+            closeTheBox();
+        }
+    });
+
+    $(document).on('keydown', function (event) {
+        if (event.key === 'Escape' && !isAnimating) {
+            closeTheBox();
+        }
+    });
+
+    $(document).on('click', '.is_open .origami_face', function () {
+        if (isAnimating) return;
+        
+        var prevFace = $('.is_open .origami_face').eq(prevIndexFace);
+        var nextFace = $('.is_open .origami_face').eq(nextIndexFace);
+        if (this === prevFace[0]) {
+            rotateBox(-1);
+        } else if (this === nextFace[0]) {
+            rotateBox(1);
+        }
+    });
+
+    $(window).on('keydown', function (event) {
+        if ($('.origami_container').hasClass(openCls)) {
+            if (!throttle && !isAnimating) {
+                if (event.key === 'ArrowLeft') {
+                    rotateBox(-1);
+                } else if (event.key === 'ArrowRight') {
+                    rotateBox(1);
+                }
+                throttle = true;
+                throttling();
+            }
+        }
+    });
+
+    $(window).on('wheel', function (event) {
+        if ($('.origami_container').hasClass(openCls)) {
+            if (!$('.is_open .origami_face.selected').has(event.target).length) {
+                if (!throttle && !isAnimating) {
+                    if (Math.sign(event.originalEvent.deltaY) === -1) {
+                        rotateBox(-1);
+                    } else if (Math.sign(event.originalEvent.deltaY) === 1) {
+                        rotateBox(1);
+                    }
+                    throttle = true;
+                    throttling();
+                }
+            }
+        }
+    });
+
+});
+
+function openOrigami(container) {
+    isAnimating = true;
+    currentBoxContainer = container;
     
-    containers.removeClass(hiddenCls);
+    // Save original dimensions
+    const originalWidth = currentBoxContainer.css('width');
+    const originalHeight = currentBoxContainer.css('height');
+    currentBoxContainer.data('original-width', originalWidth);
+    currentBoxContainer.data('original-height', originalHeight);
     
-    updateSelected();
-    
-    setTimeout(function() {
-        isAnimating = false;
-    }, 800);
+    currentBoxContainer.addClass(openCls);
+    numFaces = currentBoxContainer.find('.origami_face').length;
+    currentBoxContainer.css('z-index', '99');
+    $('.origami_container').not(currentBoxContainer).css({ 'pointer-events': 'none' });
+
+    const tl = gsap.timeline({
+        onComplete: () => {
+            isAnimating = false;
+            updateSelected();
+        }
+    });
+
+    tl.to(currentBoxContainer[0], {
+        duration: ANIMATION_DURATION,
+        width: '40vw',
+        height: '75%',
+        y: '-2rem',
+        ease: EASE_CONTAINER
+    }, 0);
+
+    currentBoxContainer.find('.origami_header').removeClass(hiddenCls);
+    currentBoxContainer.find('.project_container').removeClass(hiddenCls);
+
+    tl.to(currentBoxContainer.find('.origami_header')[0], {
+        duration: ANIMATION_DURATION * 0.6,
+        autoAlpha: 1,
+        ease: EASE_FADE
+    }, ANIMATION_DURATION * 0.4);
+
+    tl.to(currentBoxContainer.find('.project_container').toArray(), {
+        duration: ANIMATION_DURATION * 0.6,
+        autoAlpha: 1,
+        ease: EASE_FADE
+    }, ANIMATION_DURATION * 0.4);
+
+    tl.to(currentBoxContainer.find('.origami_face::before'), {
+        duration: ANIMATION_DURATION * 0.3,
+        autoAlpha: 0,
+        ease: EASE_FADE
+    }, 0);
 }
 
-function handleKeyDown(event) {
-    if (event.key === 'Escape') {
-        closeTheBox();
-    }
-}
+function closeTheBox() {
+    isAnimating = true;
+    currentBoxContainer = $('.origami_container.is_open');
+    var origami = currentBoxContainer.find('.origami')[0];
 
-function handleRotateClick(e) {
-    if (isAnimating) return;
-    
-    var openFaces = $('.is_open .origami_face');
-    var prevFace = openFaces.eq(prevIndexFace)[0];
-    var nextFace = openFaces.eq(nextIndexFace)[0];
-    
-    if (this === prevFace) {
-        rotateBox(-1);
-    } else if (this === nextFace) {
-        rotateBox(1);
-    }
-}
+    gsap.to('.project_container', {
+        scrollTo: { y: 0 },
+        duration: 0.3,
+        ease: EASE_FADE
+    });
 
-function handleArrowKeys(event) {
-    if (!cache.origamiContainers.hasClass(openCls) || throttle || isAnimating) return;
-    
-    if (event.key === 'ArrowLeft') {
-        rotateBox(-1);
-        throttle = true;
-        throttling();
-    } else if (event.key === 'ArrowRight') {
-        rotateBox(1);
-        throttle = true;
-        throttling();
-    }
-}
+    $('.origami_face').removeClass('selected selectable');
 
-function handleWheel(event) {
-    if (!cache.origamiContainers.hasClass(openCls) || isAnimating) return;
-    
-    var selectedFace = $('.is_open .origami_face.selected')[0];
-    if (selectedFace && selectedFace.contains(event.target)) return;
-    
-    if (throttle) return;
-    
-    var delta = Math.sign(event.originalEvent.deltaY);
-    if (delta !== 0) {
-        rotateBox(delta);
-        throttle = true;
-        throttling();
-    }
+    const tl = gsap.timeline({
+        onComplete: () => {
+            currentBoxContainer.removeClass(openCls);
+            currentBoxContainer.css('z-index', '0');
+            currentBoxContainer.find('.origami_header').addClass(hiddenCls);
+            currentBoxContainer.find('.project_container').addClass(hiddenCls);
+            
+            // Clear all GSAP inline styles
+            gsap.set(origami, { clearProps: 'all' });
+            gsap.set(currentBoxContainer[0], { clearProps: 'all' });
+            gsap.set(currentBoxContainer.find('.origami_header')[0], { clearProps: 'all' });
+            gsap.set(currentBoxContainer.find('.project_container').toArray(), { clearProps: 'all' });
+            
+            currentAngle = 0;
+            indexFace = 0;
+            $('.origami_container').not(currentBoxContainer).css({ 'pointer-events': 'auto' });
+            isAnimating = false;
+        }
+    });
+
+    tl.to(currentBoxContainer.find('.origami_header')[0], {
+        duration: ANIMATION_DURATION * 0.4,
+        autoAlpha: 0,
+        ease: EASE_FADE
+    }, 0);
+
+    tl.to(currentBoxContainer.find('.project_container').toArray(), {
+        duration: ANIMATION_DURATION * 0.4,
+        autoAlpha: 0,
+        ease: EASE_FADE
+    }, 0);
+
+    tl.to(currentBoxContainer[0], {
+        duration: ANIMATION_DURATION,
+        width: currentBoxContainer.data('original-width'),
+        height: currentBoxContainer.data('original-height'),
+        y: 0,
+        ease: EASE_CONTAINER
+    }, ANIMATION_DURATION * 0.2);
 }
 
 function updateSelected() {
     prevIndexFace = (indexFace - 1 + numFaces) % numFaces;
     nextIndexFace = (indexFace + 1) % numFaces;
-    
-    var faces = $('.is_open .origami_face');
-    faces.removeClass('selected selectable');
-    faces.eq(indexFace).addClass('selected');
-    faces.eq(prevIndexFace).addClass('selectable');
-    faces.eq(nextIndexFace).addClass('selectable');
-}
-
-function closeTheBox() {
-    if (isAnimating) return;
-    
-    isAnimating = true;
-    currentBoxContainer = $('.origami_container.is_open');
-    if (!currentBoxContainer.length) return;
-    
-    var origami = currentBoxContainer.find('.origami')[0];
-    
-    gsap.to(origami, {
-        rotationY: 0,
-        x: 0,
-        y: 0,
-        z: 0,
-        duration: 0.8,
-        ease: "power2.inOut",
-        clearProps: "transform"
-    });
-    
-    resetScrollPosition();
-    
-    $('.origami_face').removeClass('selected selectable');
-    
-    gsap.to(currentBoxContainer[0], {
-        zIndex: 0,
-        duration: 0,
-        delay: 0.8
-    });
-    
-    var header = currentBoxContainer.find('.origami_header');
-    gsap.to(header[0], {
-        opacity: 0,
-        duration: 0.3,
-        onComplete: function() {
-            header.addClass(hiddenCls);
-            currentBoxContainer.removeClass(openCls);
-        }
-    });
-    
-    currentBoxContainer.find('.project_container').addClass(hiddenCls);
-    
-    currentAngle = 0;
-    indexFace = 0;
-    
-    cache.origamiContainers.not(currentBoxContainer).css('pointer-events', 'auto');
-    
-    setTimeout(function() {
-        isAnimating = false;
-    }, 800);
-}
-
-function resetScrollPosition() {
-    var containers = document.querySelectorAll('.project_container');
-    gsap.to(containers, {
-        scrollTop: 0,
-        duration: 0.5,
-        ease: "power2.out"
-    });
+    $('.is_open .origami_face').removeClass(['selected', 'selectable']);
+    $('.is_open .origami_face').eq(indexFace).addClass('selected');
+    $('.is_open .origami_face').eq(prevIndexFace).addClass('selectable');
+    $('.is_open .origami_face').eq(nextIndexFace).addClass('selectable');
 }
 
 function rotateCarousel() {
     var selectedBox = document.querySelector('.is_open .origami');
-    if (!selectedBox) return;
-    
-    var sectionId = selectedBox.closest('.origami_container').id;
-    var translateZ;
-    
-    switch(sectionId) {
-        case 'web': translateZ = '-30vw'; break;
-        case 'illu': translateZ = '-38vw'; break;
-        case 'extra': translateZ = '-40vw'; break;
-        case 'about': translateZ = '-25vw'; break;
-        default: translateZ = '-30vw';
-    }
-    
-    isAnimating = true;
-    
+
+    var hasWebAncestor = $(selectedBox).parents('#web').length > 0;
+    var hasIlluAncestor = $(selectedBox).parents('#illu').length > 0;
+    var hasExtraAncestor = $(selectedBox).parents('#extra').length > 0;
+    var hasAboutAncestor = $(selectedBox).parents('#about').length > 0;
+
+    let translateZ;
+    if (hasWebAncestor) translateZ = '-30vw';
+    else if (hasIlluAncestor) translateZ = '-38vw';
+    else if (hasExtraAncestor) translateZ = '-40vw';
+    else if (hasAboutAncestor) translateZ = '-25vw';
+
     gsap.to(selectedBox, {
+        duration: ROTATION_DURATION,
         rotationY: currentAngle,
-        z: translateZ,
-        duration: 0.8,
-        ease: "power2.inOut",
-        force3D: true,
-        onComplete: function() {
-            isAnimating = false;
-            resetScrollPosition();
-        }
+        transformOrigin: 'center center',
+        ease: EASE_ROTATION,
+        force3D: true
+    });
+
+    gsap.to('.project_container', {
+        scrollTo: { y: 0 },
+        duration: ROTATION_DURATION,
+        ease: EASE_FADE
     });
 }
 
 function rotateBox(direction) {
     if (isAnimating) return;
     
+    isAnimating = true;
+    numFaces = $('.is_open .origami_face').length;
     var rotationIndex = 360 / numFaces;
     
     if (direction < 0) {
@@ -242,43 +265,60 @@ function rotateBox(direction) {
     
     rotateCarousel();
     updateSelected();
+    
+    setTimeout(() => {
+        isAnimating = false;
+    }, ROTATION_DURATION * 1000);
 }
 
 function throttling() {
-    setTimeout(function() {
-        throttle = false;
-    }, 300);
+    if (throttle) {
+        setTimeout(() => {
+            throttle = false;
+        }, 300);
+    }
 }
+
+document.addEventListener('touchstart', handleTouchStart, { passive: false });
+document.addEventListener('touchmove', handleTouchMove, { passive: false });
 
 var xDown = null;
 var yDown = null;
-var touchThreshold = 50;
+
+function getTouches(evt) {
+    return evt.touches || evt.originalEvent.touches;
+}
 
 function handleTouchStart(evt) {
-    if (!cache.origamiContainers.hasClass(openCls)) return;
-    
-    xDown = evt.touches[0].clientX;
-    yDown = evt.touches[0].clientY;
+    if (!$('.origami_container').hasClass(openCls)) {
+        return;
+    }
+
+    const firstTouch = getTouches(evt)[0];
+    xDown = firstTouch.clientX;
+    yDown = firstTouch.clientY;
+
+    evt.target.setPointerCapture(firstTouch.pointerId);
 }
 
 function handleTouchMove(evt) {
-    if (!xDown || !yDown || isAnimating) return;
-    
+    if (!$('.origami_container').hasClass(openCls) || !xDown || !yDown || isAnimating) {
+        return;
+    }
+
     var xUp = evt.touches[0].clientX;
     var yUp = evt.touches[0].clientY;
     var xDiff = xDown - xUp;
     var yDiff = yDown - yUp;
-    
-    if (Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > touchThreshold) {
-        evt.preventDefault();
-        
+
+    if (Math.abs(xDiff) > Math.abs(yDiff)) {
         if (xDiff > 0) {
             rotateBox(1);
         } else {
             rotateBox(-1);
         }
-        
-        xDown = null;
-        yDown = null;
     }
+
+    xDown = null;
+    yDown = null;
 }
